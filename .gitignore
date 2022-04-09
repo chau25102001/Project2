@@ -1,0 +1,15 @@
+*.pyc
+.DS_Store/
+__pycache__/
+*.so
+log/
+*.pt
+*.pkl
+*.pth
+*.ckpt
+*.log
+data/
+output/
+*.ipynb
+PRIVATE_*
+*_deprecated.yaml
