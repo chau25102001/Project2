@@ -186,21 +186,21 @@ def main(config, args):
 
         if mean_IoU > best_mIoU:
             best_mIoU = mean_IoU
-        torch.save(model.module.state_dict(),
-        os.path.join(final_output_dir, 'best.pth'))
+            torch.save(model.module.state_dict(),
+            os.path.join(final_output_dir, 'best.pth'))
         msg = 'Loss: {:.3f}, MeanIU: {: 4.4f}, Best_mIoU: {: 4.4f}'.format(
-    valid_loss, mean_IoU, best_mIoU)
-    print(msg)
-    print(IoU_array)
+        valid_loss, mean_IoU, best_mIoU)
+        print(msg)
+        print(IoU_array)
 
-    if epoch == end_epoch - 1:
-        torch.save(model.module.state_dict(),
-    os.path.join(final_output_dir, 'final_state.pth'))
+        if epoch == end_epoch - 1:
+            torch.save(model.module.state_dict(),
+            os.path.join(final_output_dir, 'final_state.pth'))
 
-    writer_dict['writer'].close()
-    end = timeit.default_timer()
-    print('Hours: %d' % np.int((end - start) / 3600))
-    print('Done')
+            writer_dict['writer'].close()
+            end = timeit.default_timer()
+            print('Hours: %d' % np.int((end - start) / 3600))
+            print('Done')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
