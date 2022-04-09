@@ -174,7 +174,7 @@ def main(config, args):
         writer_dict['writer'].flush()
 
         # if args.local_rank == 0:
-        logger.info('=> saving checkpoint to {}'.format(
+        print('=> saving checkpoint to {}'.format(
             final_output_dir + 'checkpoint.pth.tar'))
         torch.save({
             'epoch': epoch + 1,
@@ -186,29 +186,29 @@ def main(config, args):
 
         if mean_IoU > best_mIoU:
             best_mIoU = mean_IoU
-            torch.save(model.module.state_dict(),
-                       os.path.join(final_output_dir, 'best.pth'))
+        torch.save(model.module.state_dict(),
+        os.path.join(final_output_dir, 'best.pth'))
         msg = 'Loss: {:.3f}, MeanIU: {: 4.4f}, Best_mIoU: {: 4.4f}'.format(
-            valid_loss, mean_IoU, best_mIoU)
-        print(msg)
-        print(IoU_array)
+    valid_loss, mean_IoU, best_mIoU)
+    print(msg)
+    print(IoU_array)
 
-        if epoch == end_epoch - 1:
-            torch.save(model.module.state_dict(),
-                       os.path.join(final_output_dir, 'final_state.pth'))
+    if epoch == end_epoch - 1:
+        torch.save(model.module.state_dict(),
+    os.path.join(final_output_dir, 'final_state.pth'))
 
-            writer_dict['writer'].close()
-            end = timeit.default_timer()
-            print('Hours: %d' % np.int((end - start) / 3600))
-            print('Done')
+    writer_dict['writer'].close()
+    end = timeit.default_timer()
+    print('Hours: %d' % np.int((end - start) / 3600))
+    print('Done')
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    if __name__ == '__main__':
+        parser = argparse.ArgumentParser()
     parser.add_argument("--train_folder", default="/home/s/Gianglt/project_2/DEQ/TrainDataset/TrainDataset", type=str)
-    parser.add_argument("--test_folder", default="/home/s/Gianglt/project_2/DEQ/TestDataset/TestDataset/CVC-300", type=str)
+    parser.add_argument("--test_folder", default="/home/s/Gianglt/project_2/DEQ/TestDataset/TestDataset/CVC-300",
+                        type=str)
     # parser.add_argument("--train_folder", default="", type=str)
     args = parser.parse_args()
     config = yaml.load(open("experiments/polyp/seg_polp_small.yaml", "r"),
-                       Loader=yaml.FullLoader)
+    Loader = yaml.FullLoader)
     main(config, args)
