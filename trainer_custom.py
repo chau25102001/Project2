@@ -204,11 +204,11 @@ def main(config, args):
 
     if __name__ == '__main__':
         parser = argparse.ArgumentParser()
-    parser.add_argument("--train_folder", default="/home/s/Gianglt/project_2/DEQ/TrainDataset/TrainDataset", type=str)
-    parser.add_argument("--test_folder", default="/home/s/Gianglt/project_2/DEQ/TestDataset/TestDataset/CVC-300",
+        parser.add_argument("--train_folder", default="/home/s/Gianglt/project_2/DEQ/TrainDataset/TrainDataset", type=str)
+        parser.add_argument("--test_folder", default="/home/s/Gianglt/project_2/DEQ/TestDataset/TestDataset/CVC-300",
                         type=str)
-    # parser.add_argument("--train_folder", default="", type=str)
-    args = parser.parse_args()
-    config = yaml.load(open("experiments/polyp/seg_polp_small.yaml", "r"),
-    Loader = yaml.FullLoader)
-    main(config, args)
+        # parser.add_argument("--train_folder", default="", type=str)
+        args = parser.parse_args()
+        config = yaml.load(open("experiments/polyp/seg_polp_small.yaml", "r"),
+        Loader = yaml.FullLoader)
+        main(config, args)
