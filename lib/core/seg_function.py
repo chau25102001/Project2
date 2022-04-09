@@ -13,10 +13,7 @@ import torch.nn as nn
 import torch.distributed as dist
 from torch.nn import functional as F
 
-from utils.utils import AverageMeter
-from utils.utils import get_confusion_matrix
-from utils.utils import adjust_learning_rate
-from utils.utils import get_world_size, get_rank
+from lib.utils.utils import AverageMeter, get_confusion_matrix, get_world_size, get_rank, adjust_learning_rate
 
 
 def reduce_tensor(inp):
