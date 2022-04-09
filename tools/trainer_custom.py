@@ -34,6 +34,11 @@ from termcolor import colored
 
 
 def main(config):
+    final_output_dir = config["OUTPUT_DIR"]
+    try:
+        os.mkdir(final_output_dir)
+    except:
+        pass
     cudnn.benchmark = True
     cudnn.deterministic = True
     cudnn.enabled = True
@@ -186,8 +191,8 @@ def main(config):
                            os.path.join(final_output_dir, 'best.pth'))
             msg = 'Loss: {:.3f}, MeanIU: {: 4.4f}, Best_mIoU: {: 4.4f}'.format(
                 valid_loss, mean_IoU, best_mIoU)
-            logging.info(msg)
-            logging.info(IoU_array)
+            print(msg)
+            print(IoU_array)
 
             if epoch == end_epoch - 1:
                 torch.save(model.module.state_dict(),
@@ -195,8 +200,8 @@ def main(config):
 
                 writer_dict['writer'].close()
                 end = timeit.default_timer()
-                logger.info('Hours: %d' % np.int((end - start) / 3600))
-                logger.info('Done')
+                print('Hours: %d' % np.int((end - start) / 3600))
+                print('Done')
 
 
 if __name__ == '__main__':
