@@ -29,7 +29,6 @@ def reduce_tensor(inp):
         dist.reduce(reduced_inp, dst=0)
     return reduced_inp
 
-
 def train(config, epoch, num_epoch, epoch_iters, base_lr, num_iters,
           trainloader, optimizer, lr_scheduler, model, writer_dict, device):
     # Training
@@ -91,17 +90,15 @@ def validate(config, testloader, model, lr_scheduler, epoch, writer_dict, device
     model.eval()
     ave_loss = AverageMeter()
     confusion_matrix = np.zeros(
-        (config.DATASET.NUM_CLASSES, config.DATASET.NUM_CLASSES))
+        (config["DATASET"]["NUM_CLASSES"] + 1, config["DATASET"]["NUM_CLASSES"] + 1))
     with torch.no_grad():
         for _, batch in tqdm(enumerate(testloader)):
             image, label, _ = batch
             size = label.size()
-            image = image.to(device)
-            label = label.to(device)
+            image = image.to(device).float()
+            label = label.to(device).float()
 
             losses, pred = model(image, label, train_step=-1)
-            pred = F.interpolate(input=pred, size=(
-                size[-2], size[-1]), mode='bilinear', align_corners=True)
             loss = losses.mean()
             reduced_loss = reduce_tensor(loss)
             ave_loss.update(reduced_loss.item())
@@ -110,17 +107,14 @@ def validate(config, testloader, model, lr_scheduler, epoch, writer_dict, device
                 label,
                 pred,
                 size,
-                config.DATASET.NUM_CLASSES,
-                config.TRAIN.IGNORE_LABEL)
+                config["DATASET"]["NUM_CLASSES"])
 
     confusion_matrix = torch.from_numpy(confusion_matrix).to(device)
     reduced_confusion_matrix = reduce_tensor(confusion_matrix)
 
     confusion_matrix = reduced_confusion_matrix.cpu().numpy()
-    pos = confusion_matrix.sum(1)
-    res = confusion_matrix.sum(0)
-    tp = np.diag(confusion_matrix)
-    IoU_array = (tp / np.maximum(1.0, pos + res - tp))
+    tp = confusion_matrix[-1, -1]
+    IoU_array = (tp / np.maximum(1.0, sum(confusion_matrix.ravel()) - confusion_matrix[0,0]))
     mean_IoU = IoU_array.mean()
     print_loss = ave_loss.average() / world_size
 
@@ -156,8 +150,7 @@ def testval(config, test_dataset, testloader, model,
                 label,
                 pred,
                 size,
-                config.DATASET.NUM_CLASSES,
-                config.TRAIN.IGNORE_LABEL)
+                config.DATASET.NUM_CLASSES)
 
             if sv_pred:
                 sv_path = os.path.join(sv_dir, 'test_val_results')

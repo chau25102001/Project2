@@ -32,7 +32,7 @@ from lib.utils.utils import create_logger, FullModel, get_rank
 from termcolor import colored
 
 
-def main(config):
+def main(config, args):
     final_output_dir = config["OUTPUT_DIR"]
     try:
         os.mkdir(final_output_dir)
@@ -59,7 +59,7 @@ def main(config):
 
     torch.cuda.empty_cache()
 
-    train_dataset = PolypDataset(root=r"D:\LTGiang\MSV-20194430\project 2\mdeq\data\TrainDataset", img_path="image",
+    train_dataset = PolypDataset(root=args.train_folder, img_path="image",
                                  mask_path="mask")
 
     trainloader = torch.utils.data.DataLoader(
@@ -71,7 +71,7 @@ def main(config):
         drop_last=True)
 
     test_size = (config["TEST"]["IMAGE_SIZE"][1], config["TEST"]["IMAGE_SIZE"][0])
-    test_dataset = PolypDataset(root=r"D:\LTGiang\MSV-20194430\project 2\mdeq\data\TestDataset\CVC-300",
+    test_dataset = PolypDataset(root=args.test_folder,
                                 img_path="images",
                                 mask_path="masks")
 
@@ -155,56 +155,60 @@ def main(config):
     }
 
     for epoch in range(last_epoch, end_epoch):
-        if epoch >= config["TRAIN"]["END_EPOCH"]:
-            train(config, epoch - config["TRAIN"]["END_EPOCH"],
-                  config["TRAIN"]["EXTRA_EPOCH"], epoch_iters,
-                  config["TRAIN"]["EXTRA_LR"], extra_iters,
-                  extra_trainloader, optimizer, lr_scheduler, model,
-                  writer_dict, device)
-        else:
-            train(config, epoch, config["TRAIN"]["END_EPOCH"],
-                  epoch_iters, config["TRAIN"]["LR"], num_iters,
-                  trainloader, optimizer, lr_scheduler, model, writer_dict,
-                  device)
-
-        torch.cuda.empty_cache()
+        # if epoch >= config["TRAIN"]["END_EPOCH"]:
+        #     train(config, epoch - config["TRAIN"]["END_EPOCH"],
+        #           config["TRAIN"]["EXTRA_EPOCH"], epoch_iters,
+        #           config["TRAIN"]["EXTRA_LR"], extra_iters,
+        #           extra_trainloader, optimizer, lr_scheduler, model,
+        #           writer_dict, device)
+        # else:
+        #     train(config, epoch, config["TRAIN"]["END_EPOCH"],
+        #           epoch_iters, config["TRAIN"]["LR"], num_iters,
+        #           trainloader, optimizer, lr_scheduler, model, writer_dict,
+        #           device)
+        #
+        # torch.cuda.empty_cache()
         valid_loss, mean_IoU, IoU_array = validate(config, testloader, model, lr_scheduler, epoch,
                                                    writer_dict, device)
         torch.cuda.empty_cache()
         writer_dict['writer'].flush()
 
-        if args.local_rank == 0:
-            logger.info('=> saving checkpoint to {}'.format(
-                final_output_dir + 'checkpoint.pth.tar'))
-            torch.save({
-                'epoch': epoch + 1,
-                'best_mIoU': best_mIoU,
-                'state_dict': model.module.state_dict(),
-                'optimizer': optimizer.state_dict(),
-                'lr_scheduler': lr_scheduler.state_dict(),
-            }, os.path.join(final_output_dir, 'checkpoint.pth.tar'))
+        # if args.local_rank == 0:
+        logger.info('=> saving checkpoint to {}'.format(
+            final_output_dir + 'checkpoint.pth.tar'))
+        torch.save({
+            'epoch': epoch + 1,
+            'best_mIoU': best_mIoU,
+            'state_dict': model.module.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'lr_scheduler': lr_scheduler.state_dict(),
+        }, os.path.join(final_output_dir, 'checkpoint.pth.tar'))
 
-            if mean_IoU > best_mIoU:
-                best_mIoU = mean_IoU
-                torch.save(model.module.state_dict(),
-                           os.path.join(final_output_dir, 'best.pth'))
-            msg = 'Loss: {:.3f}, MeanIU: {: 4.4f}, Best_mIoU: {: 4.4f}'.format(
-                valid_loss, mean_IoU, best_mIoU)
-            print(msg)
-            print(IoU_array)
+        if mean_IoU > best_mIoU:
+            best_mIoU = mean_IoU
+            torch.save(model.module.state_dict(),
+                       os.path.join(final_output_dir, 'best.pth'))
+        msg = 'Loss: {:.3f}, MeanIU: {: 4.4f}, Best_mIoU: {: 4.4f}'.format(
+            valid_loss, mean_IoU, best_mIoU)
+        print(msg)
+        print(IoU_array)
 
-            if epoch == end_epoch - 1:
-                torch.save(model.module.state_dict(),
-                           os.path.join(final_output_dir, 'final_state.pth'))
+        if epoch == end_epoch - 1:
+            torch.save(model.module.state_dict(),
+                       os.path.join(final_output_dir, 'final_state.pth'))
 
-                writer_dict['writer'].close()
-                end = timeit.default_timer()
-                print('Hours: %d' % np.int((end - start) / 3600))
-                print('Done')
+            writer_dict['writer'].close()
+            end = timeit.default_timer()
+            print('Hours: %d' % np.int((end - start) / 3600))
+            print('Done')
 
 
 if __name__ == '__main__':
-    config = yaml.load(open(r"experiments/polyp/seg_polp_small.yaml", "r"),
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train_folder", default="data/TrainDataset", type=str)
+    parser.add_argument("--test_folder", default="data/TestDataset/CVC-300", type=str)
+    # parser.add_argument("--train_folder", default="", type=str)
+    args = parser.parse_args()
+    config = yaml.load(open("experiments/polyp/seg_polp_small.yaml", "r"),
                        Loader=yaml.FullLoader)
-    print(type(config))
-    main(config)
+    main(config, args)

@@ -97,9 +97,9 @@ class PolypDataset(Dataset):
             image, label = self.image_resize(image, long_size, label=label)
             if rand_crop:
                 image, label = self.rand_crop(image, label)
-                lh, lw = label.shape[:2]
-                label = cv2.resize(label, (lw // 4, lh // 4),
-                                   interpolation=cv2.INTER_NEAREST)
+                # lh, lw = label.shape[:2]
+                # label = cv2.resize(label, (lw // 4, lh // 4),
+                #                    interpolation=cv2.INTER_NEAREST)
             return image, label
         else:
             image = self.image_resize(image, long_size)
