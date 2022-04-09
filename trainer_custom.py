@@ -155,19 +155,19 @@ def main(config, args):
     }
 
     for epoch in range(last_epoch, end_epoch):
-        # if epoch >= config["TRAIN"]["END_EPOCH"]:
-        #     train(config, epoch - config["TRAIN"]["END_EPOCH"],
-        #           config["TRAIN"]["EXTRA_EPOCH"], epoch_iters,
-        #           config["TRAIN"]["EXTRA_LR"], extra_iters,
-        #           extra_trainloader, optimizer, lr_scheduler, model,
-        #           writer_dict, device)
-        # else:
-        #     train(config, epoch, config["TRAIN"]["END_EPOCH"],
-        #           epoch_iters, config["TRAIN"]["LR"], num_iters,
-        #           trainloader, optimizer, lr_scheduler, model, writer_dict,
-        #           device)
-        #
-        # torch.cuda.empty_cache()
+        if epoch >= config["TRAIN"]["END_EPOCH"]:
+            train(config, epoch - config["TRAIN"]["END_EPOCH"],
+                  config["TRAIN"]["EXTRA_EPOCH"], epoch_iters,
+                  config["TRAIN"]["EXTRA_LR"], extra_iters,
+                  extra_trainloader, optimizer, lr_scheduler, model,
+                  writer_dict, device)
+        else:
+            train(config, epoch, config["TRAIN"]["END_EPOCH"],
+                  epoch_iters, config["TRAIN"]["LR"], num_iters,
+                  trainloader, optimizer, lr_scheduler, model, writer_dict,
+                  device)
+
+        torch.cuda.empty_cache()
         valid_loss, mean_IoU, IoU_array = validate(config, testloader, model, lr_scheduler, epoch,
                                                    writer_dict, device)
         torch.cuda.empty_cache()
@@ -205,8 +205,8 @@ def main(config, args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train_folder", default="data/TrainDataset", type=str)
-    parser.add_argument("--test_folder", default="data/TestDataset/CVC-300", type=str)
+    parser.add_argument("--train_folder", default="/home/s/Gianglt/project_2/DEQ/TrainDataset", type=str)
+    parser.add_argument("--test_folder", default="/home/s/Gianglt/project_2/DEQ/TestDataset/TestDataset/CVC-300", type=str)
     # parser.add_argument("--train_folder", default="", type=str)
     args = parser.parse_args()
     config = yaml.load(open("experiments/polyp/seg_polp_small.yaml", "r"),
