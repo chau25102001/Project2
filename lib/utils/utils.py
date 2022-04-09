@@ -172,7 +172,7 @@ def get_confusion_matrix(label, pred, size, num_class):
 
     # pred.shape:   bs * 1 * h * w --> bs, h, w, 1
     assert num_class == 1, "No Supported multiple label!"
-    output = pred.cpu().numpy().transpose(0, 2, 3, 1)
+    output = torch.sigmoid(pred).cpu().numpy().transpose(0, 2, 3, 1)
     output = np.where(output > 0.5, 1, 0)
     return confusion_matrix(label.cpu().reshape(-1), output.reshape(-1))
 
